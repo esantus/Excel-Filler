@@ -68,7 +68,7 @@ class Dataset(AbstractDataset):
         
         # Saving the classes
         self.classes = [x for x in ds[opt.output].unique() if str(x) != 'nan']
-        if opt.print:
+        if opt.pr:
             self.classes.append('nan')
         self.num_classes = len(self.classes)
         self.class_to_indx = {tag:i for i, tag in enumerate(self.classes)}
@@ -78,13 +78,13 @@ class Dataset(AbstractDataset):
         for index, row in ds.iterrows():
             
             # Maximum number of entries to consider
-            if pd.isnull(row[opt.output]) and opt.print == False:
+            if pd.isnull(row[opt.output]) and opt.pr == False:
                 continue
             
             # Turning the output string in a tokenized array
             output_string = str(row[opt.output]).strip()
 
-            if output_string == '' and opt.print == False:
+            if output_string == '' and opt.pr == False:
                 print("Current output column row is empty, passing to the next row")
                 continue
             
