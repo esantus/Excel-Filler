@@ -36,10 +36,10 @@ def main():
     parser.add_option('-b', '--class_balance', default=True, action='store_true', help='if True, use class balance')
     parser.add_option('-r', '--char', default=True, action='store_true', help='if True, use character embeddings too')
     
-    parser.add_option('-f', '--excel_file', default='/Users/esantus/Projects/Amgen/LIMS Gold Standard_1.xlsx', action='store', help='excel file to be used for Training/Prediciton')
+    parser.add_option('-f', '--excel_file', default='example.xlsx', action='store', help='excel file to be used for Training/Prediciton')
     parser.add_option('-e', '--embedding_file', default='/Users/esantus/Projects/Resources/glove/glove.6B.300d.txt', action='store', help='embedding file to be used')
-    parser.add_option('-i', '--input_columns', default='Product,component', action='store', type=str, help='input columns in format: x1,x2...,xN')
-    parser.add_option('-o', '--output_columns', default='Assay', action='store', type=str, help='output columns in format: x1,x2...,xN')
+    parser.add_option('-i', '--input_columns', default='REGION,CITY', action='store', type=str, help='input columns in format: x1,x2...,xN')
+    parser.add_option('-o', '--output_columns', default='COUNTRY', action='store', type=str, help='output columns in format: x1,x2...,xN')
 
     parser.add_option('-s', '--model_path', default='snapshot/', action='store', type=str, help='folder in which the model is (going to be) saved')
     parser.add_option('-n', '--model_name', default='_model.pt', action='store', type=str, help='model name as it is (going to be) saved')
