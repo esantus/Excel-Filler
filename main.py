@@ -70,13 +70,13 @@ def main():
     
     if opt.mode == 'train':
         opt.train = True
-        opt.print = False
+        opt.pr = False
     elif opt.mode == 'predict':
         opt.train = False
-        opt.print = True
+        opt.pr = True
     elif opt.mode == 'test':
         opt.train = False
-        opt.print = False
+        opt.pr = False
         
     opt.input_columns = opt.input_columns.split(',')
     opt.output_columns = opt.output_columns.split(',')
@@ -124,8 +124,8 @@ def main():
             
             # Setting the correct combination
             args.train = False
-            if opt.print == True:
-                args.print = True
+            if opt.pr == True:
+                args.pr = True
             opt = args
             
             encoder = torch.load(opt.model_full_path)
