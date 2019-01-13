@@ -286,7 +286,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
 
         logit, _ = model(x_indx, char_x_indx)
 
-        if not opt.print:
+        if not opt.pr:
             # Calculate the loss
             loss = get_loss(logit, y, opt)
             obj_loss = loss
@@ -296,7 +296,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
             loss.backward()
             optimizer.step()
 
-        if not opt.print:
+        if not opt.pr:
             # Saving loss
             obj_losses.append(tensor_to_numpy(obj_loss))
             losses.append(tensor_to_numpy(loss))
@@ -309,7 +309,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
         golds.extend(batch['y'].numpy())
         preds.extend(torch.max(batch_softmax, 1)[1].view(y.size()).data.numpy())
 
-        if opt.print:
+        if opt.pr:
             text = batch['cols_vals']
             for k in text:
                 if k not in texts:
@@ -317,7 +317,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
                 texts[k].extend(text[k])
                     
     # Get metrics
-    if opt.print:
+    if opt.pr:
         epoch_stat = {}
     else:
         epoch_metrics = get_metrics(preds, golds, opt)
@@ -326,7 +326,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
             epoch_stat[metric_k] = epoch_metrics[metric_k]
         
     
-    if opt.print:
+    if opt.pr:
         texts['preds'] = [opt.y2label[preds[j]] for j in range(len(preds))]
         texts = pd.DataFrame(texts)
         writer = pd.ExcelWriter(opt.output_file)
