@@ -33,7 +33,7 @@ def test_model(test_data, model, opt, indx_to_class):
         num_workers=opt.num_workers,
         drop_last=False)
 
-    #if opt.print:   
+    #if opt.pr:   
     #else:
     # The function is defined before
     test_stats = init_metrics_dictionary(modes=['test'])
