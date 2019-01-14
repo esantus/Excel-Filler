@@ -40,6 +40,8 @@ python main.py --mode='test' --excel_file='excel_path' --embedding_file='embeddi
 python main.py --mode='predict' --excel_file='excel_path' --embedding_file='embedding_path' --input_columns='col1,col2' --output_columns='col3,col4'
 ```
 
+While all input columns are processed together, the system loops among the output columns. The loop includes all the three modes (i.e. train, test, predict). In the 'predict' mode, for each output column it will generate an excel file containing all the existing columns plus a new column with the predictions. The file names clearly describe the predicted column and the source file.
+
 For more information about Convolutional Neural Network, please read [this nice article](https://adeshpande3.github.io/A-Beginner%27s-Guide-To-Understanding-Convolutional-Neural-Networks-Part-2/) from Adit Deshpande.
 
 
