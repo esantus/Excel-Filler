@@ -6,11 +6,20 @@
 *Excel Filler* is a Word+Char Convolutional Neural Network that accurately classifies text in one or more input columns of an Excel file and writes the predicted class in an output column. Both input and output columns can be indicated by the user.
 
 
+## Compatibility and Future Development
+
+Please notice that the code works well with **pytorch 0.3.0.post4**, while I have experienced problems with other versions.
+
+You are welcome to use and help to improve the code.
+
+
 ## What to use it for?
 
 Suppose you have an Excel file with two or more textual columns. One or more of these columns are fully filled, while one or more of them are only partially filled.
 
 An example (see: example.xlsx) can be an Excel file containing *Region*, *City* and *Country*. Suppose that for *Region* and *City* you have thousands of filled rows, while for *Country* you only have few hundred filled ones. Given this situation, you can train *Excel Filler* to learn the association between the existing combinations of *Region*, *City* and *Country*, and --- on this basis --- predict the countries of the remaining *Region*-*City* pairs.
+
+The insertion of character embedding is meant to allow users to apply *Excel Filler* also on non-word fields (e.g. bar-codes).
 
 Because the system will learn on the existing *Region*-*City*-*Country* combinations, it is important to notice that at the prediction time it will infer the new combinations (i.e. it will classify the *Region*-*City* pairs) only on the basis of what it has experienced during training. This means, in other words, that it will classify the *Region*-*City* pairs only according to any of the *Countr*ies that it has seen during training time.
 
@@ -98,4 +107,5 @@ Options:
   --num_workers=NUM_WORKERS
                         save the number of workers
 ```
+
 
