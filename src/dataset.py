@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan  8 15:23:19 2019
+@author: esantus
+"""
+
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 import torch.utils.data as data
 import torch
