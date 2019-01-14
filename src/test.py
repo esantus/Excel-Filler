@@ -22,7 +22,7 @@ def test_model(test_data, model, opt, indx_to_class):
         
         :return test_stats:
     '''
-    if opt.cuda:
+    if opt.gpu:
         model = model.cuda()
 
     # Loading the test data as iterable

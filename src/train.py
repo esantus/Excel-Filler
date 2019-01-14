@@ -35,7 +35,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
     
     snapshot = opt.model_full_path
 
-    if opt.cuda:
+    if opt.gpu:
         model = model.cuda()
 
     opt.lr = opt.init_lr
@@ -97,7 +97,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
             model.cpu()
             model = torch.load(snapshot)
 
-            if opt.cuda:
+            if opt.gpu:
                 model = model.cuda()
             opt.lr *= .5
             optimizer = get_optimizer([model], opt)

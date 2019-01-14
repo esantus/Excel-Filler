@@ -274,17 +274,23 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
 
         # Load X and Y
         x_indx = get_x_indx(batch, eval_model)
-        char_x_indx = get_char_x_indx(batch, eval_model)
+        if opt.char:
+            char_x_indx = get_char_x_indx(batch, eval_model)
         
         y = autograd.Variable(batch['y'], volatile=eval_model)
 
-        if opt.cuda:
+        if opt.gpu:
             x_indx, y = x_indx.cuda(), y.cuda()
+            if opt.char:
+                char_x_indx = char_x_indx.cuda()
 
         if train_model:
             optimizer.zero_grad()
 
-        logit, _ = model(x_indx, char_x_indx)
+        if opt.char:
+            logit, _ = model(x_indx, char_x_indx)
+        else:
+            logit, _ = model(x_indx, char_x_indx=False)
 
         if not opt.pr:
             # Calculate the loss

@@ -40,8 +40,6 @@ class Encoder(nn.Module):
         self.filters = opt.filters
         self.filter_num = opt.filter_num
         
-        self.cuda = opt.cuda
-        
         self.dropout = opt.dropout
         
         self.len_chars = len(list(set(opt.chars))) + 1
@@ -86,7 +84,7 @@ class Encoder(nn.Module):
         
         
         
-    def forward(self, x_indx, char_x_indx):
+    def forward(self, x_indx, char_x_indx=False):
         '''
         Forward step
         
@@ -98,18 +96,14 @@ class Encoder(nn.Module):
 
         if self.opt.debug:
             pdb.set_trace()
-            
+
         word_x = self.emb_layer(x_indx.squeeze(1))
         
         if self.opt.char:
             char_x = self.char_emb(self.char_emb_layer(char_x_indx.view(-1, self.max_chars)).transpose(1, 2)).view(-1, self.max_words, self.emb_dims)
-            #pdb.set_trace()
             x = torch.cat((word_x, char_x), 2)
         else:
             x = word_x
-        
-        if self.cuda:
-            x = x.cuda()
         
         # Non linear projection with dropout
         x = F.relu(self.emb_fc(x))
@@ -156,7 +150,7 @@ class TextCNN(nn.Module):
         self.filters = opt.filters
         self.filter_num = opt.filter_num
         self.emb_dims = emb_dim #opt.emb_dims + opt.char_emb_dims
-        self.cuda = opt.cuda
+        self.gpu = opt.gpu
         self.max_pool = max_pool_over_time
         
         self.layers = []
@@ -200,7 +194,7 @@ class TextCNN(nn.Module):
                 pad_tensor_size[2] = left_pad
                 left_pad_tensor = autograd.Variable(torch.zeros(pad_tensor_size))
                     
-                if self.cuda:
+                if self.gpu:
                     left_pad_tensor = left_pad_tensor.cuda()
                         
                 # Concatenating the padding to the tensor

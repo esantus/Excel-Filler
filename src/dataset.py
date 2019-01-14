@@ -9,6 +9,8 @@ import re
 import random
 import tqdm
 
+import sys
+
 import pdb
 
 
@@ -64,8 +66,8 @@ class Dataset(AbstractDataset):
         self.char_to_indx['PADDING_CHAR'] = 0
 
         # Loading the Excel file
-        ds = pd.read_excel(opt.excel_file, encoding = "ISO-8859-1")
-        
+        ds = pd.read_excel(opt.excel_file, encoding = 'ascii') #'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
+ 
         # Saving the classes
         self.classes = [x for x in ds[opt.output].unique() if str(x) != 'nan']
         if opt.pr:
@@ -112,11 +114,13 @@ class Dataset(AbstractDataset):
             self.class_balance[y] += 1
             
             # Saving the dataset
-            if type(opt.input_columns) == list:
-                self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':",".join([re.sub(",", " ", str(row[input_col]).strip()) for input_col in opt.input_columns]), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
-            else:
-                self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':str(row[opt.input_columns]).strip(), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
-
+            try:
+                if type(opt.input_columns) == list:
+                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':",".join([re.sub(",", " ", str(row[input_col]).strip()) for input_col in opt.input_columns]), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
+                else:
+                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':str(row[opt.input_columns]).strip(), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
+            except:
+                print('Skipping because of character encoding errors')
         # Randomly split train in 60-20-20%
         if opt.train:
             random.shuffle(self.dataset)
