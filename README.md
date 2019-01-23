@@ -33,11 +33,11 @@ The system loads the input and output columns indicated by the user from an Exce
 As any other machine learning method, *Excel Filler* needs to go through training, validation and testing, before it can be actually used for predictions. You can switch these modalities by simply calling the program in the following way:
 
 ```
-python main.py --mode='train' --excel_file='excel_path' --embedding_file='embedding_path' --input_columns='col1,col2' --output_columns='col3,col4'
+python main.py --mode train --excel_file excel_path --embedding_file embedding_path --input_columns col1,col2 --output_columns col3,col4
 
-python main.py --mode='test' --excel_file='excel_path' --embedding_file='embedding_path' --input_columns='col1,col2' --output_columns='col3,col4'
+python main.py --mode train --excel_file excel_path --embedding_file embedding_path --input_columns col1,col2 --output_columns col3,col4
 
-python main.py --mode='predict' --excel_file='excel_path' --embedding_file='embedding_path' --input_columns='col1,col2' --output_columns='col3,col4'
+python main.py --mode train --excel_file excel_path --embedding_file embedding_path --input_columns col1,col2 --output_columns col3,col4
 ```
 
 While all input columns are processed together, the system loops among the output columns. The loop includes all the three modes (i.e. train, test, predict). In the 'predict' mode, for each output column it will generate an excel file containing all the existing columns plus a new column with the predictions. The file names clearly describe the predicted column and the source file.
