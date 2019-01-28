@@ -337,5 +337,6 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
         texts = pd.DataFrame(texts)
         writer = pd.ExcelWriter(opt.output_file)
         texts.to_excel(writer)
+        writer.save()
 
     return epoch_stat, step, losses, preds, golds
