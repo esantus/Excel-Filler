@@ -44,6 +44,8 @@ def test_model(test_data, model, opt, indx_to_class):
     mode = 'Test'
     train_model = False
     key_prefix = mode.lower()
+    
+    metrics_file.write("-------------\nTest\n")
     print("-------------\nTest")
     #pdb.set_trace()
     epoch_details, _, losses, preds, golds = run_epoch(
