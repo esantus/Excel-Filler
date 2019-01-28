@@ -51,7 +51,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
     train_loader = get_train_loader(train_data, opt, class_balance)
     dev_loader = get_dev_loader(dev_data, opt)
     
-    metrics_file = open(metrics_file_name, 'w')
+    metrics_file = open(metrics_file_name, 'a')
 
     # For every epoch...
     for epoch in range(1, opt.epochs + 1):
