@@ -34,6 +34,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
     '''
     
     snapshot = opt.model_full_path
+    metrics_file_name = opt.output_file.split('.')[0] + ".txt"
 
     if opt.gpu:
         model = model.cuda()
@@ -49,9 +50,12 @@ def train_model(train_data, dev_data, class_balance, model, opt):
 
     train_loader = get_train_loader(train_data, opt, class_balance)
     dev_loader = get_dev_loader(dev_data, opt)
+    
+    metrics_file = open(metrics_file_name, 'w')
 
     # For every epoch...
     for epoch in range(1, opt.epochs + 1):
+        metrics_file.write("-------------\nEpoch {}:\n".format(epoch))
         print("-------------\nEpoch {}:\n".format(epoch))
         
         # Load the training and dev sets...
@@ -61,6 +65,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
             #try:
             
                 train_model = mode == 'Train'
+                metrics_file.write('{}\n'.format(mode))
                 print('{}'.format(mode))
                 key_prefix = mode.lower()
                 epoch_details, step, _, _, _ = run_epoch(data_loader=loader, train_model=train_model, model=model,
@@ -69,6 +74,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
                 epoch_stats, log_statement = collate_epoch_stat(epoch_stats, epoch_details, key_prefix, opt)
                 
                 # Log performance
+                metrics_file.write('{}\n'.format(log_statement))
                 print(log_statement)
             #except:
             #   pdb.set_trace()
@@ -86,6 +92,9 @@ def train_model(train_data, dev_data, class_balance, model, opt):
             num_epoch_sans_improvement += 1
 
         if not train_model:
+            metrics_file.write('---- Best Dev {} is {:.4f} at epoch {}\n\n'.format(
+                opt.tuning_metric, epoch_stats[tuning_key][epoch_stats['best_epoch']],
+                epoch_stats['best_epoch'] + 1))
             print('---- Best Dev {} is {:.4f} at epoch {}'.format(
                 opt.tuning_metric, epoch_stats[tuning_key][epoch_stats['best_epoch']],
                 epoch_stats['best_epoch'] + 1))
