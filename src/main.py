@@ -13,6 +13,7 @@ import pdb
 
 import optparse
 
+import torch
 import embeddings as emb
 import dataset as ds
 import model as mdl
