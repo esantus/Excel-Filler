@@ -24,6 +24,9 @@ def test_model(test_data, model, opt, indx_to_class):
     '''
     if opt.gpu:
         model = model.cuda()
+        
+    metrics_file_name = opt.output_file.split('.')[0] + ".txt"
+    metrics_file = open(metrics_file_name, 'a')
 
     # Loading the test data as iterable
     test_loader = torch.utils.data.DataLoader(
@@ -56,6 +59,7 @@ def test_model(test_data, model, opt, indx_to_class):
     test_stats['preds'] = preds
     test_stats['golds'] = golds
 
+    metrics_file.write('{}\n'.format(log_statement))
     print(log_statement)
 
     return test_stats
