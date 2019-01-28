@@ -90,9 +90,9 @@ def main():
 
     for output in opt.output_columns:
         opt.output = output
-        opt.model_full_path = '{}'.format(os.path.join(opt.model_path, output + opt.model_name))
-        opt.config = '{}'.format(os.path.join(opt.model_path, 'config_' + output + opt.model_name.split('.')[0] + '.pt'))
-        opt.output_file = '{}'.format(os.path.join(opt.model_path, 'output_' + output + '_' + opt.excel_file.split('/')[-1].split('.')[0] + '.xlsx'))
+        opt.model_full_path = '{}'.format(os.path.join(opt.model_path, output + "__" + "_".join(opt.input_columns) + "__" + opt.excel_file.split('/')[-1].split('.')[0] + opt.model_name))
+        opt.config = '{}'.format(os.path.join(opt.model_path, 'config_' + output + "__" + "_".join(opt.input_columns) + "__" + opt.excel_file.split('/')[-1].split('.')[0] + opt.model_name.split('.')[0] + '.pt'))
+        opt.output_file = '{}'.format(os.path.join(opt.model_path, 'output_' + output + "__" + "_".join(opt.input_columns) + "__" + opt.excel_file.split('/')[-1].split('.')[0] + '.xlsx'))
         
         print('Model: {}\nConfig: {}\nOutput File: {}'.format(opt.model_full_path, opt.config, opt.output_file))
 
