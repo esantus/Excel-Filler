@@ -22,7 +22,7 @@ def load_embeddings(emb_path, emb_dims):
     '''
 
     # Load the file
-    lines = open(emb_path).readlines()
+    lines = open(emb_path, encoding = "utf-8").readlines()
     
     # Creating the list and adding the PADDING embedding
     emb_tensor = [np.zeros(emb_dims)]
