@@ -34,7 +34,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
     '''
     
     snapshot = opt.model_full_path
-    metrics_file_name = opt.output_file.split('.')[0] + ".txt"
+    metrics_file_name = opt.model_path + opt.output_file.split('/')[-1].split('.')[0] + '_' + opt.mode + ".txt"
 
     if opt.gpu:
         model = model.cuda()
@@ -116,4 +116,5 @@ def train_model(train_data, dev_data, class_balance, model, opt):
         model.cpu()
         model = torch.load(snapshot)
 
+    metrics_file.close()
     return epoch_stats, model
