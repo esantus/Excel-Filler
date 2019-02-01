@@ -102,7 +102,7 @@ def main():
         # Load the dataset in the format list({'x':WORD_INDEX_TENSOR, 'y':TAG_NUMBER,
         # 'text':'full text...', 'y_name':TAG_NAME}, {...}).
         dataset = ds.Dataset(word_to_indx, opt) 
-	opt.num_classes = dataset.num_classes
+        opt.num_classes = dataset.num_classes
         opt.y2label = dataset.indx_to_class
         print("Dataset: {}\nTrain: {}\nDev: {}\nTest: {}".format(len(dataset.dataset), len(dataset.train), len(dataset.dev), len(dataset.test)))
 
