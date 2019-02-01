@@ -6,8 +6,9 @@ Created on Tue Jan  8 18:24:09 2019
 """
 
 # Load the Embeddings
-
+import os
 import numpy as np
+import pickle as p
 
 
 def load_embeddings(emb_path, emb_dims):
@@ -20,6 +21,11 @@ def load_embeddings(emb_path, emb_dims):
         :return emb_tensor: tensor containing all word embeedings
         :return word_to_indx: dictionary with word:index
     '''
+    
+    # Check if the serial version of the embedding exists
+    pickle_emb_path = emb_path[:-3]+'p'
+    if os.path.exists(pickle_emb_path):
+        return p.load(open(pickle_emb_path, 'rb'))
 
     # Load the file
     lines = open(emb_path, encoding = "utf-8").readlines()
@@ -41,4 +47,6 @@ def load_embeddings(emb_path, emb_dims):
     
     # Turning the list into a numpy object
     emb_tensor = np.array(emb_tensor, dtype=np.float32)
+    p.dump((emb_tensor, word_to_indx), open(pickle_emb_path, 'wb'))
+    
     return emb_tensor, word_to_indx
