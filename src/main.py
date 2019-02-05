@@ -78,7 +78,7 @@ def main():
         opt.train = False
         opt.pr = False
         
-    opt.input_columns = opt.input_columns.split(',')
+    opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
     opt.output_columns = opt.output_columns.split(',')
     if type(opt.filters) == str:
         opt.filters = [int(x) for x in opt.filters.split(',')]
