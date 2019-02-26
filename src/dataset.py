@@ -75,7 +75,7 @@ class Dataset(AbstractDataset):
 
         # Loading the Excel file
         ds = pd.read_excel(opt.excel_file, encoding = 'ascii') #'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
- 
+
         # Saving the classes
         self.classes = [x for x in ds[opt.output].unique() if str(x) != 'nan']
         if opt.pr:

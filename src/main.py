@@ -19,6 +19,7 @@ import dataset as ds
 import model as mdl
 import train as train
 import test as test
+import pandas as pd
 
 import pickle
 
@@ -47,7 +48,7 @@ def main():
     parser.add_option('-j', '--objective', default='cross_entropy', action='store', type=str, help='objective function')
     
     parser.add_option('--init_lr', default=0.0001, action='store', type=float, help='save the initial learning rate')
-    parser.add_option('--epochs', default=3, action='store', type=int, help='save the number of epochs')
+    parser.add_option('--epochs', default=2, action='store', type=int, help='save the number of epochs')
     parser.add_option('--batch_size', default=16, action='store', type=int, help='save the batch size')
     parser.add_option('--patience', default=5, action='store', type=int, help='save the patience before cutting the learning rate')
     parser.add_option('--emb_dims', default=300, action='store', type=int, help='save the embedding dimension')
@@ -80,6 +81,17 @@ def main():
         
     opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
     opt.output_columns = opt.output_columns.split(',')
+
+    _ds = pd.read_excel(opt.excel_file, encoding='ascii')  # 'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
+    output = []
+    col = list(_ds.head(0))
+    print('before', opt.output_columns, col)
+    for i in col:
+        if i in opt.output_columns:
+            output.append(i)
+    opt.output_columns = output
+    print('now', opt.output_columns)
+
 
     if type(opt.filters) == str:
         opt.filters = [int(x) for x in opt.filters.split(',')]
