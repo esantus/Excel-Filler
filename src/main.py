@@ -32,7 +32,7 @@ def main():
     parser.add_option('--mode', default='train', action='store', type=str, help='save the mode (train, test, predict)')
 
     parser.add_option('-d', '--debug', default=False, action='store_true', help='if True, print debug information')
-    parser.add_option('-g', '--gpu', default=True, action='store_true', help='if True, use the GPU')
+    parser.add_option('-g', '--gpu', default=False, action='store_true', help='if True, use the GPU')
     parser.add_option('-b', '--class_balance', default=True, action='store_true', help='if True, use class balance')
     parser.add_option('-r', '--char', default=True, action='store_true', help='if True, use character embeddings too')
     
@@ -47,7 +47,7 @@ def main():
     parser.add_option('-j', '--objective', default='cross_entropy', action='store', type=str, help='objective function')
     
     parser.add_option('--init_lr', default=0.0001, action='store', type=float, help='save the initial learning rate')
-    parser.add_option('--epochs', default=320, action='store', type=int, help='save the number of epochs')
+    parser.add_option('--epochs', default=3, action='store', type=int, help='save the number of epochs')
     parser.add_option('--batch_size', default=16, action='store', type=int, help='save the batch size')
     parser.add_option('--patience', default=5, action='store', type=int, help='save the patience before cutting the learning rate')
     parser.add_option('--emb_dims', default=300, action='store', type=int, help='save the embedding dimension')
@@ -80,6 +80,7 @@ def main():
         
     opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
     opt.output_columns = opt.output_columns.split(',')
+
     if type(opt.filters) == str:
         opt.filters = [int(x) for x in opt.filters.split(',')]
     
@@ -101,6 +102,7 @@ def main():
         
         # Load the dataset in the format list({'x':WORD_INDEX_TENSOR, 'y':TAG_NUMBER,
         # 'text':'full text...', 'y_name':TAG_NAME}, {...}).
+
         dataset = ds.Dataset(word_to_indx, opt) 
         opt.num_classes = dataset.num_classes
         opt.y2label = dataset.indx_to_class
@@ -110,6 +112,9 @@ def main():
             pdb.set_trace()
         
         if opt.train:
+
+
+
             # Create and train the model, save it and save the configuration file.
             config = pickle.dump(opt, open(opt.config, 'wb'))
             encoder = mdl.Encoder(emb_tensor, opt)
@@ -120,14 +125,16 @@ def main():
         else:
             # Load the model and the configuration file.    
             args = pickle.load(open(opt.config, 'rb'))
-            
+
+
+
             # Setting the correct combination
             args.train = False
             if opt.pr == True:
                 args.pr = True
             opt = args
-            
-            encoder = torch.load(opt.model_full_path)
+            encoder = mdl.Encoder(emb_tensor, opt)
+            encoder.load_state_dict(torch.load(opt.model_full_path))
             
             test.test_model(dataset.dataset, encoder, opt, indx_to_class=opt.y2label) # Necessary to send the index_to_class
             print("Test set: {}".format(len(dataset.dataset)))

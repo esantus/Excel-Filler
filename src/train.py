@@ -87,7 +87,10 @@ def train_model(train_data, dev_data, class_balance, model, opt):
                 os.makedirs(opt.save_dir)
             # Subtract one because epoch is 1-indexed and arr is 0-indexed
             epoch_stats['best_epoch'] = epoch - 1
-            torch.save(model, snapshot)
+            print('saved\nsaved\nsaved')
+            torch.save(model.state_dict(), snapshot)
+
+
         else:
             num_epoch_sans_improvement += 1
 
@@ -104,7 +107,8 @@ def train_model(train_data, dev_data, class_balance, model, opt):
             print("Reducing learning rate")
             num_epoch_sans_improvement = 0
             model.cpu()
-            model = torch.load(snapshot)
+
+            model.load_state_dict(torch.load(snapshot))
 
             if opt.gpu:
                 model = model.cuda()
@@ -114,7 +118,7 @@ def train_model(train_data, dev_data, class_balance, model, opt):
     # Restore model to best dev performance
     if os.path.exists(opt.model_path):
         model.cpu()
-        model = torch.load(snapshot)
 
+        model.load_state_dict(torch.load(snapshot))
     metrics_file.close()
     return epoch_stats, model
