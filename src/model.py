@@ -38,7 +38,7 @@ class Encoder(nn.Module):
         self.num_class = opt.num_classes
         
         self.filters = opt.filters
-        self.filter_num = opt.filter_num
+
         
         self.dropout = opt.dropout
         
@@ -58,6 +58,7 @@ class Encoder(nn.Module):
         
         if opt.char:
             # Loading the character embeddings in the Neural Network
+            self.filter_num = opt.char_filter_num
             char_vocab_size = self.len_chars
             char_hidden_dim = self.char_emb_dims
             self.char_emb_dims = char_hidden_dim
@@ -70,6 +71,7 @@ class Encoder(nn.Module):
             self.cnn = TextCNN(opt, opt.emb_dims + opt.char_emb_dims, max_pool_over_time=True)
             self.emb_fc = nn.Linear(word_hidden_dim *2, word_hidden_dim + char_hidden_dim)
         else:
+            self.filter_num = opt.filter_num
             self.emb_fc = nn.Linear(word_hidden_dim, word_hidden_dim)
             # Calling the Classification Model, followed by a fully connected hidden layer
             self.cnn = TextCNN(opt, opt.emb_dims, max_pool_over_time=True)

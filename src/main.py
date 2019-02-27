@@ -58,6 +58,7 @@ def main():
     parser.add_option('--dropout', default=0.2, action='store', type=float, help='save the dropout probability')
     parser.add_option('--weight_decay', default=1e-3, action='store', type=float, help='save the weight decay')
     parser.add_option('--filter_num', default=100, action='store', type=int, help='save the number of filters')
+    parser.add_option('--char_filter_num', default=100, action='store', type=int, help='save the number of character filters')
     parser.add_option('--filters', default=[3, 4, 5], action='store', type=str, help='save the list of filters in format x1,x2...,xN')
     parser.add_option('--num_class', default=100, action='store', type=int, help='save the number of classes in the output')
     parser.add_option('--max_words', default=30, action='store', type=int, help='save the maximum number of words to use from the input')
