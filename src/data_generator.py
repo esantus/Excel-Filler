@@ -6,7 +6,9 @@ str = np.array(str)
 sentence = []
 label = []
 
+
 num_row = 100
+
 
 for i in range(num_row):
     k = random.sample(range(len(str)),5)
@@ -16,8 +18,10 @@ for i in range(num_row):
         k=np.insert(k,p,'man')
     else:
         k=np.insert(k,p,'woman')
+
     sentence.append((' '.join(k),('female' if i%2 else 'male')+('0' if i%4 == 0 else '2'),i%4))
     label.append(i%2)
 
 df = pd.DataFrame.from_records(sentence, columns=['sent','lab','sth'])
+
 df.to_excel('output.xlsx')

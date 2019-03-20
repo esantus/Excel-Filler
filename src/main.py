@@ -51,7 +51,9 @@ def main():
     parser.add_option('-j', '--objective', default='cross_entropy', action='store', type=str, help='objective function')
     
     parser.add_option('--init_lr', default=0.0001, action='store', type=float, help='save the initial learning rate')
+
     parser.add_option('--epochs', default=200, action='store', type=int, help='save the number of epochs')
+
     parser.add_option('--batch_size', default=16, action='store', type=int, help='save the batch size')
     parser.add_option('--patience', default=5, action='store', type=int, help='save the patience before cutting the learning rate')
     parser.add_option('--emb_dims', default=300, action='store', type=int, help='save the embedding dimension')
@@ -83,8 +85,7 @@ def main():
     elif opt.mode == 'test':
         opt.train = False
         opt.pr = False
-    #if opt.input_columns == None:
-    #    opt.input_columns = opt.input_numbers
+
     opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
     opt.input_numbers = [x for x in opt.input_numbers.split(',') if x != '']
     opt.output_columns = opt.output_columns.split(',')
@@ -93,6 +94,7 @@ def main():
 
     output = []
     col = list(_ds.head(0))
+
 
     for i in col:
         if i in opt.output_columns:

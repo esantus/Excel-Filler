@@ -85,7 +85,6 @@ class Dataset(AbstractDataset):
 
         # Loading the Excel file
         ds = pd.read_excel(opt.excel_file, encoding = 'ascii') #'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
-        #print('this is 88 in dataset.py',ds['sth'])
 
 
         # Saving the classes
