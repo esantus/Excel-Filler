@@ -25,7 +25,7 @@ def test_model(test_data, model, opt, indx_to_class):
     if opt.gpu:
         model = model.cuda()
         
-    metrics_file_name = opt.output_file.split('.')[0] + ".txt"
+    metrics_file_name = opt.model_path + opt.output_file.split('/')[-1].split('.')[0] + '_' + opt.mode + ".txt"
     metrics_file = open(metrics_file_name, 'a')
 
     # Loading the test data as iterable
@@ -62,6 +62,7 @@ def test_model(test_data, model, opt, indx_to_class):
     test_stats['golds'] = golds
 
     metrics_file.write('{}\n'.format(log_statement))
+    metrics_file.close()
     print(log_statement)
 
     return test_stats

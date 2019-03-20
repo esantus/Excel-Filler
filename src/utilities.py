@@ -122,8 +122,9 @@ def get_x_indx(batch, eval_model):
         
         :return x_indx: tensor of batch*x
     '''
-    
-    x_indx = autograd.Variable(batch['x'], volatile=eval_model)
+
+    x_indx = autograd.Variable(batch['x'], volatile=eval_model) if not isinstance(batch['x'],list) else []
+    x_indx = (x_indx,autograd.Variable(batch['x_num'] , volatile=eval_model) if not isinstance(batch['x_num'],list) else [] )
     return x_indx
 
 
@@ -137,7 +138,7 @@ def get_char_x_indx(batch, eval_model):
         :return char_x_indx: tensor of batch*char_x
     '''
     
-    char_x_indx = autograd.Variable(batch['char_x'], volatile=eval_model)
+    char_x_indx = autograd.Variable(batch['char_x'], volatile=eval_model) if not isinstance(batch['char_x'],list) else []
     return char_x_indx
 
 
@@ -155,6 +156,8 @@ def get_loss(logit, y, opt):
     if opt.objective == 'cross_entropy':
         loss = F.cross_entropy(logit, y)
     elif opt.objective == 'mse':
+
+
         loss = F.mse_loss(logit, y.float())
     else:
         raise Exception("Objective {} not supported!".format(opt.objective))
@@ -274,6 +277,10 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
 
         # Load X and Y
         x_indx = get_x_indx(batch, eval_model)
+
+        if isinstance(x_indx,tuple):
+            x_indx,x_num = x_indx
+
         if opt.char:
             char_x_indx = get_char_x_indx(batch, eval_model)
         
@@ -283,14 +290,16 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
             x_indx, y = x_indx.cuda(), y.cuda()
             if opt.char:
                 char_x_indx = char_x_indx.cuda()
+            if x_num != []:
+                x_num = x_num.cuda()
 
         if train_model:
             optimizer.zero_grad()
 
         if opt.char:
-            logit, _ = model(x_indx, char_x_indx)
+            logit, _ = model((x_indx,x_num), char_x_indx)
         else:
-            logit, _ = model(x_indx, char_x_indx=False)
+            logit, _ = model((x_indx,x_num), char_x_indx=False)
 
         if not opt.pr:
             # Calculate the loss
@@ -313,7 +322,10 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
         # Softmax, preds, text and gold
         batch_softmax = F.softmax(logit, dim=-1).cpu()
         golds.extend(batch['y'].numpy())
-        preds.extend(torch.max(batch_softmax, 1)[1].view(y.size()).data.numpy())
+        if opt.objective == 'mse':
+            preds.extend(logit.data.numpy()[:,0])
+        else:
+            preds.extend(torch.max(batch_softmax, 1)[1].view(y.size()).data.numpy())
 
         if opt.pr:
             text = batch['cols_vals']
@@ -333,7 +345,8 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
         
     
     if opt.pr:
-        texts['preds'] = [opt.y2label[preds[j]] for j in range(len(preds))]
+        print(preds)
+        texts['preds'] = [opt.y2label[preds[j]] for j in range(len(preds))] if opt.objective != 'mse' else [preds[j] for j in range(len(preds))]
         texts = pd.DataFrame(texts)
         writer = pd.ExcelWriter(opt.output_file)
         texts.to_excel(writer)

@@ -16,9 +16,10 @@ import optparse
 import torch
 import embeddings as emb
 import dataset as ds
-import model as mdl
+import advanced_model as mdl
 import train as train
 import test as test
+import pandas as pd
 
 import pickle
 
@@ -32,14 +33,17 @@ def main():
     parser.add_option('--mode', default='train', action='store', type=str, help='save the mode (train, test, predict)')
 
     parser.add_option('-d', '--debug', default=False, action='store_true', help='if True, print debug information')
-    parser.add_option('-g', '--gpu', default=True, action='store_true', help='if True, use the GPU')
+    parser.add_option('-g', '--gpu', default=False, action='store_true', help='if True, use the GPU')
     parser.add_option('-b', '--class_balance', default=True, action='store_true', help='if True, use class balance')
     parser.add_option('-r', '--char', default=True, action='store_true', help='if True, use character embeddings too')
+
     
     parser.add_option('-f', '--excel_file', default='../datasets/LIMS.xlsx', action='store', help='excel file to be used for Training/Prediciton')
     parser.add_option('-e', '--embedding_file', default='../embeddings/glove.6B.300d.txt', action='store', help='embedding file to be used')
-    parser.add_option('-i', '--input_columns', default='Product', action='store', type=str, help='input columns in format: x1,x2...,xN')
-    parser.add_option('-o', '--output_columns', default='Assay', action='store', type=str, help='output columns in format: x1,x2...,xN')
+    parser.add_option('-i', '--input_columns', default='', action='store', type=str, help='input columns in format: x1,x2...,xN')
+    parser.add_option('-a', '--input_numbers', default='', action='store', type=str,
+                      help='input columns in format: x1,x2...,xN')
+    parser.add_option('-o', '--output_columns', default='e', action='store', type=str, help='output columns in format: x1,x2...,xN')
 
     parser.add_option('-s', '--model_path', default='../snapshot/', action='store', type=str, help='folder in which the model is (going to be) saved')
     parser.add_option('-n', '--model_name', default='_model.pt', action='store', type=str, help='model name as it is (going to be) saved')
@@ -47,7 +51,7 @@ def main():
     parser.add_option('-j', '--objective', default='cross_entropy', action='store', type=str, help='objective function')
     
     parser.add_option('--init_lr', default=0.0001, action='store', type=float, help='save the initial learning rate')
-    parser.add_option('--epochs', default=320, action='store', type=int, help='save the number of epochs')
+    parser.add_option('--epochs', default=200, action='store', type=int, help='save the number of epochs')
     parser.add_option('--batch_size', default=16, action='store', type=int, help='save the batch size')
     parser.add_option('--patience', default=5, action='store', type=int, help='save the patience before cutting the learning rate')
     parser.add_option('--emb_dims', default=300, action='store', type=int, help='save the embedding dimension')
@@ -57,6 +61,7 @@ def main():
     parser.add_option('--dropout', default=0.2, action='store', type=float, help='save the dropout probability')
     parser.add_option('--weight_decay', default=1e-3, action='store', type=float, help='save the weight decay')
     parser.add_option('--filter_num', default=100, action='store', type=int, help='save the number of filters')
+    parser.add_option('--char_filter_num', default=100, action='store', type=int, help='save the number of character filters')
     parser.add_option('--filters', default=[3, 4, 5], action='store', type=str, help='save the list of filters in format x1,x2...,xN')
     parser.add_option('--num_class', default=100, action='store', type=int, help='save the number of classes in the output')
     parser.add_option('--max_words', default=30, action='store', type=int, help='save the maximum number of words to use from the input')
@@ -65,6 +70,7 @@ def main():
     parser.add_option('--dev_size', default=.2, action='store', type=float, help='save the relative size of the dev set')
     parser.add_option('--test_size', default=.2, action='store', type=float, help='save the relative size of the test set')
     parser.add_option('--num_workers', default=0, action='store', type=int, help='save the number of workers')
+
     
     (opt, args) = parser.parse_args()
     
@@ -77,16 +83,31 @@ def main():
     elif opt.mode == 'test':
         opt.train = False
         opt.pr = False
-        
-    opt.input_columns = opt.input_columns.split(',')
+    #if opt.input_columns == None:
+    #    opt.input_columns = opt.input_numbers
+    opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
+    opt.input_numbers = [x for x in opt.input_numbers.split(',') if x != '']
     opt.output_columns = opt.output_columns.split(',')
+
+    _ds = pd.read_excel(opt.excel_file, encoding='ascii')  # 'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
+
+    output = []
+    col = list(_ds.head(0))
+
+    for i in col:
+        if i in opt.output_columns:
+            output.append(i)
+    opt.output_columns = output
+
+
+
     if type(opt.filters) == str:
         opt.filters = [int(x) for x in opt.filters.split(',')]
     
     
     if opt.debug:
         print('Input columns: {}\nOutput columns: {}\nFilters: {}'.format(opt.input_columns, opt.output_columns, opt.filters))
-    
+
 
     for output in opt.output_columns:
         opt.output = output
@@ -101,6 +122,7 @@ def main():
         
         # Load the dataset in the format list({'x':WORD_INDEX_TENSOR, 'y':TAG_NUMBER,
         # 'text':'full text...', 'y_name':TAG_NAME}, {...}).
+
         dataset = ds.Dataset(word_to_indx, opt) 
         opt.num_classes = dataset.num_classes
         opt.y2label = dataset.indx_to_class
@@ -110,6 +132,9 @@ def main():
             pdb.set_trace()
         
         if opt.train:
+
+
+
             # Create and train the model, save it and save the configuration file.
             config = pickle.dump(opt, open(opt.config, 'wb'))
             encoder = mdl.Encoder(emb_tensor, opt)
@@ -120,14 +145,16 @@ def main():
         else:
             # Load the model and the configuration file.    
             args = pickle.load(open(opt.config, 'rb'))
-            
+
+
+
             # Setting the correct combination
             args.train = False
             if opt.pr == True:
                 args.pr = True
             opt = args
-            
-            encoder = torch.load(opt.model_full_path)
+            encoder = mdl.Encoder(emb_tensor, opt)
+            encoder.load_state_dict(torch.load(opt.model_full_path))
             
             test.test_model(dataset.dataset, encoder, opt, indx_to_class=opt.y2label) # Necessary to send the index_to_class
             print("Test set: {}".format(len(dataset.dataset)))

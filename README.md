@@ -111,3 +111,29 @@ Options:
 ```
 
 
+
+Update:
+
+Here are some examples of using this Excel Filler:
+
+**With only word input**:
+
+python3 main.py --mode train --excel_file output.xlsx --input_columns sent --output_columns lab
+
+
+
+**With both word input and number input**:
+
+python3 main.py --mode train --excel_file output.xlsx --input_columns sent --input_numbers sth --output_columns lab
+
+
+
+**With just number input**:
+
+python3 main.py --mode train --excel_file iris.xlsx --input_numbers a,b,c,d --output_columns e
+
+
+
+**With just number input, and the goal being Regressor**:
+
+python3 main.py --mode predict --excel_file boston.xlsx --input_numbers DIS,RAD,TAX,PTRATIO,B --output_columns target --objective mse

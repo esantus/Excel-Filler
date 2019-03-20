@@ -9,6 +9,7 @@ Created on Tue Jan  8 15:23:19 2019
 from abc import ABCMeta, abstractmethod, abstractproperty
 import torch.utils.data as data
 import torch
+from torch.autograd import Variable
 
 import numpy as np
 import pandas as pd
@@ -25,7 +26,16 @@ import pdb
 SEPARATORS = [' ', '  ', '+', '.', ',', '%', '-', '\\', '/', '(', ')', '[', ']',
               '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '=', ':']
 
-
+if torch.cuda.is_available():
+  def to_torch(x, dtype, req = False):
+    tor_type = torch.cuda.LongTensor if dtype == "int" else torch.cuda.FloatTensor
+    x = Variable(torch.from_numpy(x).type(tor_type), requires_grad = req)
+    return x
+else:
+  def to_torch(x, dtype, req = False):
+    tor_type = torch.LongTensor if dtype == "int" else torch.FloatTensor
+    x = Variable(torch.from_numpy(x).type(tor_type), requires_grad = req)
+    return x
 
 class AbstractDataset(data.Dataset):
     '''
@@ -75,13 +85,16 @@ class Dataset(AbstractDataset):
 
         # Loading the Excel file
         ds = pd.read_excel(opt.excel_file, encoding = 'ascii') #'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
- 
+        #print('this is 88 in dataset.py',ds['sth'])
+
+
         # Saving the classes
-        self.classes = [x for x in ds[opt.output].unique() if str(x) != 'nan']
+        self.classes = [str(x) for x in ds[opt.output].unique() if str(x) != 'nan']
         if opt.pr:
             self.classes.append('nan')
         self.num_classes = len(self.classes)
         self.class_to_indx = {tag:i for i, tag in enumerate(self.classes)}
+
         self.indx_to_class = {self.class_to_indx[key]:key for key in self.class_to_indx}
 
         # Saving the datapoints
@@ -99,22 +112,40 @@ class Dataset(AbstractDataset):
                 continue
             
             # Turning the input string in a tokenized array; every column is preceeded/followed by <s>
-            if type(opt.input_columns) == list:
+
+            input_string = None
+            if  type(opt.input_columns) == list and opt.input_columns != []:
                 input_string = ("<s> " + " <s> ".join([str(row[input_col]).strip() for input_col in opt.input_columns]) + " <s>").lower()
-            else:
+            elif opt.input_columns != []:
                 input_string = ("<s> " + row[str(opt.input_columns)] + " <s>").lower()
+            input_number = []
+            #print(opt.input_numbers)
+            if opt.input_numbers != []:
+                input_number = [row[input_col] for input_col in opt.input_numbers]
+                input_number = to_torch(np.array(input_number),'float')
+
+
             
-            if len(set(input_string.split())) <= 1:
+            if input_string != None and len(set(input_string.split())) <= 1 and len(input_number) <= 1:
                 print("Current input column row is empty, passing to the next row")
                 continue
             
-            input_string = self.tokenizeString(input_string, SEPARATORS)
-            #print(input_string)
+            if input_string != None:
+                input_string = self.tokenizeString(input_string, SEPARATORS)
+
             
             # Creating x and y for every datapoint
-            x = self.get_indices_tensor(input_string, self.word_to_indx, self.max_length)
-            char_x = self.get_char_indices(input_string, self.char_to_indx, opt)
-            y = self.class_to_indx[output_string]
+
+            if input_string != None:
+                x = self.get_indices_tensor(input_string, self.word_to_indx, self.max_length)
+                char_x = self.get_char_indices(input_string, self.char_to_indx, opt)
+            else:
+                x = []
+                char_x = []
+            if input_string == None:
+                input_string = []
+            y = self.class_to_indx[output_string] if opt.objective != 'mse' else to_torch(np.array([row[opt.output]]),'float')
+
             
             # Saving the class_balance
             if not y in self.class_balance:
@@ -122,11 +153,14 @@ class Dataset(AbstractDataset):
             self.class_balance[y] += 1
             
             # Saving the dataset
+
             try:
                 if type(opt.input_columns) == list:
-                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':",".join([re.sub(",", " ", str(row[input_col]).strip()) for input_col in opt.input_columns]), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
+                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns},'input_fields':",".join([re.sub(",", " ", str(row[input_col]).strip()) for input_col in opt.input_columns]), 'text':input_string, 'x':x, 'x_num':input_number,'char_x':char_x, 'y':y, 'label':output_string})
+
                 else:
-                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':str(row[opt.input_columns]).strip(), 'text':input_string, 'x':x, 'char_x':char_x, 'y':y, 'label':output_string})
+                    self.dataset.append({'cols_vals':{col:str(row[col]) for col in ds.columns}, 'input_fields':str(row[opt.input_columns]).strip(), 'text':input_string, 'x':x,'x_num':input_number, 'char_x':char_x, 'y':y, 'label':output_string})
+
             except:
                 print('Skipping because of character encoding errors')
         # Randomly split train in 60-20-20%
@@ -138,11 +172,11 @@ class Dataset(AbstractDataset):
         
         # Actual split
         self.train = self.dataset[:num_train]
-        self.train_class_balance = self.calculate_weights(self.train)
+        self.train_class_balance = self.calculate_weights(self.train) if opt.objective != 'mse' else [1.0/len(self.train)]*len(self.train)
         
         self.dev = self.dataset[num_train:num_train+num_dev]
         self.test = self.dataset[num_train+num_dev:]
-        
+
         
     def calculate_weights(self, ds):
         count = [0] * self.num_classes
