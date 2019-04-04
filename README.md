@@ -3,23 +3,23 @@
 
 ## About
 
-*Excel Filler* is a Word+Char Convolutional Neural Network that accurately classifies text in one or more input columns of an Excel file and writes the predicted class in an output column. Both input and output columns can be indicated by the user.
+*Excel Filler* is a Word+Char Convolutional Neural Network that accurately classifies text or predict numbers in one or more input columns of an Excel file and writes the predicted class and numbers in the output columns. Both input and output columns can be indicated by the user.
 
 
 ## Compatibility and Future Development
 
-Please notice that the code works well with **pytorch 0.3.0.post4**, while I have experienced problems with other versions.
-
-You are welcome to use and help to improve the code.
+Please notice that the code works well with any versions of pytorch.
 
 
 ## What to use it for?
 
-Suppose you have an Excel file with two or more textual columns. One or more of these columns are fully filled, while one or more of them are only partially filled.
+Suppose you have an Excel file with two or more textual or number columns. One or more of these columns are fully filled, while one or more of them are only partially filled.
 
 An example (see: example.xlsx) can be an Excel file containing *Region*, *City* and *Country*. Suppose that for *Region* and *City* you have thousands of filled rows, while for *Country* you only have few hundred filled ones. Given this situation, you can train *Excel Filler* to learn the association between the existing combinations of *Region*, *City* and *Country*, and --- on this basis --- predict the countries of the remaining *Region*-*City* pairs.
 
 The insertion of character embedding is meant to allow users to apply *Excel Filler* also on non-word fields (e.g. bar-codes).
+
+The input columns can be both characters or numbers, and the user needs to specify which columns are words and which columns are numbers. Similarly, the output can also be either words or numbers. Notice that depending on whether user wants classification or regression, the user needs to specify the loss function to be cross-entropy or MSE.
 
 Because the system will learn on the existing *Region*-*City*-*Country* combinations, it is important to notice that at the prediction time it will infer the new combinations (i.e. it will classify the *Region*-*City* pairs) only on the basis of what it has experienced during training. This means, in other words, that it will classify the *Region*-*City* pairs only according to any of the *Countr*ies that it has seen during training time.
 
@@ -43,6 +43,45 @@ python main.py --mode train --excel_file excel_path --embedding_file embedding_p
 While all input columns are processed together, the system loops among the output columns. The loop includes all the three modes (i.e. train, test, predict). In the 'predict' mode, for each output column it will generate an excel file containing all the existing columns plus a new column with the predictions. The file names clearly describe the predicted column and the source file.
 
 For more information about Convolutional Neural Network, please read [this nice article](https://adeshpande3.github.io/A-Beginner%27s-Guide-To-Understanding-Convolutional-Neural-Networks-Part-2/) from Adit Deshpande.
+
+
+More details on how to properly configure the command:
+
+**With only word input and output**:
+If all the input and output columns are words, then the user can simply specify the input_columns and output_columns.
+```
+python3 main.py --mode train --excel_file output.xlsx --input_columns sent --output_columns lab
+```
+
+
+**With both word input and number input, but words output**:
+In this case, the user needs to add the number input by using **--input_numbers col**
+```
+python3 main.py --mode train --excel_file output.xlsx --input_columns sent --input_numbers sth --output_columns lab
+```
+
+
+**With just number input**:
+In this case, the user needs to specify the input columns using **--input_numbers a,b,c,d**
+```
+python3 main.py --mode train --excel_file iris.xlsx --input_numbers a,b,c,d --output_columns e
+```
+**On the Iris dataset, we are able to get an accuracy of 1.0.
+
+**With just number input, and the goal being Regressor**:
+In this case, the user needs to specify the loss to be MSE by using **--objective mse**
+```
+python3 main.py --mode predict --excel_file boston.xlsx --input_numbers DIS,RAD,TAX,PTRATIO,B --output_columns target --objective mse
+```
+**On the Boston dataset, we are able to get a MSE error of 0.6**.
+
+Accuracies tested on toy dataset:
+
+For classification task, on the Iris dataset, we are able to get an accuracy of $1.0$.
+For regression task, on the Boston dataset, we are ablt to get an MSE loss of $0.6$.
+
+
+
 
 
 ## Configuration
@@ -112,30 +151,3 @@ Options:
 
 
 
-Update:
-
-Here are some examples of using this Excel Filler:
-
-**With only word input**:
-
-python3 main.py --mode train --excel_file output.xlsx --input_columns sent --output_columns lab
-
-
-
-**With both word input and number input**:
-
-python3 main.py --mode train --excel_file output.xlsx --input_columns sent --input_numbers sth --output_columns lab
-
-
-
-**With just number input**:
-
-python3 main.py --mode train --excel_file iris.xlsx --input_numbers a,b,c,d --output_columns e
-
-**On the Iris dataset, we are able to get an accuracy of 1.0.
-
-**With just number input, and the goal being Regressor**:
-
-python3 main.py --mode predict --excel_file boston.xlsx --input_numbers DIS,RAD,TAX,PTRATIO,B --output_columns target --objective mse
-
-**On the Boston dataset, we are able to get a MSE error of 0.6**.
