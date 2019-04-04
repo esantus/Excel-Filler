@@ -11,7 +11,7 @@ from utilities import *
 
 # Testing the model
 
-def test_model(test_data, model, opt, indx_to_class):
+def test_model(test_data, model, opt, indx_to_class,req_output=False):
     '''
     Run the model on test data, and return statistics,
     including loss and accuracy.
@@ -48,13 +48,22 @@ def test_model(test_data, model, opt, indx_to_class):
     metrics_file.write("-------------\nTest\n")
     print("-------------\nTest")
     #pdb.set_trace()
-    epoch_details, _, losses, preds, golds = run_epoch(
-        data_loader=test_loader,
-        train_model=train_model,
-        model=model,
-        optimizer=None,
-        step=None,
-        opt=opt, indx_to_class=indx_to_class)
+    if req_output:
+        epoch_details, _, losses, preds, golds, res = run_epoch(
+            data_loader=test_loader,
+            train_model=train_model,
+            model=model,
+            optimizer=None,
+            step=None,
+            opt=opt, indx_to_class=indx_to_class,req_output = True)
+    else:
+        epoch_details, _, losses, preds, golds = run_epoch(
+            data_loader=test_loader,
+            train_model=train_model,
+            model=model,
+            optimizer=None,
+            step=None,
+            opt=opt, indx_to_class=indx_to_class)
 
     test_stats, log_statement = collate_epoch_stat(test_stats, epoch_details, 'test', opt)
     test_stats['losses'] = losses
@@ -65,4 +74,4 @@ def test_model(test_data, model, opt, indx_to_class):
     metrics_file.close()
     print(log_statement)
 
-    return test_stats
+    return test_stats,res if req_output else test_stats

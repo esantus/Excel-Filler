@@ -70,6 +70,7 @@ class Dataset(AbstractDataset):
             :return: nothing
         '''
 
+
         self.dataset = []
         self.class_balance = {}
         
@@ -175,6 +176,7 @@ class Dataset(AbstractDataset):
         
         self.dev = self.dataset[num_train:num_train+num_dev]
         self.test = self.dataset[num_train+num_dev:]
+
 
         
     def calculate_weights(self, ds):

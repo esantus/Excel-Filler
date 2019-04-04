@@ -52,7 +52,7 @@ def main():
     
     parser.add_option('--init_lr', default=0.0001, action='store', type=float, help='save the initial learning rate')
 
-    parser.add_option('--epochs', default=200, action='store', type=int, help='save the number of epochs')
+    parser.add_option('--epochs', default=5, action='store', type=int, help='save the number of epochs')
 
     parser.add_option('--batch_size', default=16, action='store', type=int, help='save the batch size')
     parser.add_option('--patience', default=5, action='store', type=int, help='save the patience before cutting the learning rate')
@@ -87,7 +87,9 @@ def main():
         opt.pr = False
 
     opt.input_columns = [x for x in opt.input_columns.split(',') if x != '']
+
     opt.input_numbers = [x for x in opt.input_numbers.split(',') if x != '']
+
     opt.output_columns = opt.output_columns.split(',')
 
     _ds = pd.read_excel(opt.excel_file, encoding='ascii')  # 'sys.getfilesystemencoding()') #"ascii") #ISO-8859-1")
@@ -110,7 +112,11 @@ def main():
     if opt.debug:
         print('Input columns: {}\nOutput columns: {}\nFilters: {}'.format(opt.input_columns, opt.output_columns, opt.filters))
 
-
+    if isinstance(opt.output_columns,list):
+        final_ds = pd.read_excel(opt.excel_file, encoding='ascii')
+        req_output = True
+    else:
+        req_output = False
     for output in opt.output_columns:
         opt.output = output
         opt.model_full_path = '{}'.format(os.path.join(opt.model_path, output + "__" + "_".join(opt.input_columns) + "__" + opt.excel_file.split('/')[-1].split('.')[0] + opt.model_name))
@@ -139,7 +145,9 @@ def main():
 
             # Create and train the model, save it and save the configuration file.
             config = pickle.dump(opt, open(opt.config, 'wb'))
+
             encoder = mdl.Encoder(emb_tensor, opt)
+
             train.train_model(dataset.train, dataset.dev, dataset.train_class_balance, encoder, opt) # Not necessary to send the index_to_class
             
             test.test_model(dataset.test, encoder, opt, opt.y2label)
@@ -158,10 +166,16 @@ def main():
             encoder = mdl.Encoder(emb_tensor, opt)
             encoder.load_state_dict(torch.load(opt.model_full_path))
             
-            test.test_model(dataset.dataset, encoder, opt, indx_to_class=opt.y2label) # Necessary to send the index_to_class
+            _, res = test.test_model(dataset.dataset, encoder, opt, indx_to_class=opt.y2label,req_output = req_output) # Necessary to send the index_to_class
+            final_ds['pred_'+output] = res
             print("Test set: {}".format(len(dataset.dataset)))
-
-
+    if req_output:
+        output_file = '{}'.format(os.path.join(opt.model_path,
+                                               'output_' + "_".join(opt.output_columns) + "__" + "_".join(opt.input_columns) + "__" +
+                                               opt.excel_file.split('/')[-1].split('.')[0] + '.xlsx'))
+        writer = pd.ExcelWriter(output_file, engine='xlsxwriter')
+        final_ds.to_excel(writer)
+        writer.save()
 if __name__ == "__main__":
     main()
 

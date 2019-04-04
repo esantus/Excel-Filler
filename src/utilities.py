@@ -232,7 +232,7 @@ def collate_epoch_stat(stat_dict, epoch_details, mode, opt):
 
 
 # Run each epoch
-def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_class=False):
+def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_class=False,req_output=False):
     '''
     Train model for one pass of train data, and return loss, acccuracy
     
@@ -344,7 +344,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
             epoch_stat[metric_k] = epoch_metrics[metric_k]
         
     
-    if opt.pr:
+    if opt.pr and req_output == False:
         print(preds)
         texts['preds'] = [opt.y2label[preds[j]] for j in range(len(preds))] if opt.objective != 'mse' else [preds[j] for j in range(len(preds))]
         texts = pd.DataFrame(texts)
@@ -352,4 +352,7 @@ def run_epoch(data_loader, train_model, model, optimizer, step, opt, indx_to_cla
         texts.to_excel(writer)
         writer.save()
 
-    return epoch_stat, step, losses, preds, golds
+    if req_output:
+        return epoch_stat, step, losses, preds, golds, [opt.y2label[preds[j]] for j in range(len(preds))] if opt.objective != 'mse' else [preds[j] for j in range(len(preds))]
+    else:
+        return epoch_stat, step, losses, preds, golds

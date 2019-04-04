@@ -28,6 +28,7 @@ class Encoder(nn.Module):
 
             :return: nothing
         '''
+
         super(Encoder, self).__init__()
 
         self.opt = opt
@@ -76,7 +77,6 @@ class Encoder(nn.Module):
         # The hidden fully connected layer size is given by the number of filters
         # times the filter size, by the number of hidden dimensions
         num_numbers = len(opt.input_numbers)
-        print('num_numbers is',num_numbers)
 
 
         if opt.input_columns != []:
