@@ -66,19 +66,19 @@ In this case, the user needs to specify the input columns using **--input_number
 ```
 python3 main.py --mode train --excel_file iris.xlsx --input_numbers a,b,c,d --output_columns e
 ```
-**On the Iris dataset, we are able to get an accuracy of 1.0.
+
 
 **With just number input, and the goal being Regressor**:
 In this case, the user needs to specify the loss to be MSE by using **--objective mse**
 ```
 python3 main.py --mode predict --excel_file boston.xlsx --input_numbers DIS,RAD,TAX,PTRATIO,B --output_columns target --objective mse
 ```
-**On the Boston dataset, we are able to get a MSE error of 0.6**.
+
 
 Accuracies tested on toy dataset:
 
-For classification task, on the Iris dataset, we are able to get an accuracy of $1.0$.
-For regression task, on the Boston dataset, we are ablt to get an MSE loss of $0.6$.
+For classification task, on the Iris dataset, we are able to get an accuracy of 1.0.
+For regression task, on the Boston dataset, we are ablt to get an MSE loss of 0.6.
 
 
 
