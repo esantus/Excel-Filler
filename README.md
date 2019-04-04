@@ -147,6 +147,9 @@ Options:
                         save the relative size of the test set
   --num_workers=NUM_WORKERS
                         save the number of workers
+  --input_numbers 
+                        input columns that are numbers in the format x1,x2,x3...
+                        
 ```
 
 
