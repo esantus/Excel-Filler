@@ -132,8 +132,10 @@ python3 main.py --mode train --excel_file output.xlsx --input_columns sent --inp
 
 python3 main.py --mode train --excel_file iris.xlsx --input_numbers a,b,c,d --output_columns e
 
-
+**On the Iris dataset, we are able to get an accuracy of 1.0.
 
 **With just number input, and the goal being Regressor**:
 
 python3 main.py --mode predict --excel_file boston.xlsx --input_numbers DIS,RAD,TAX,PTRATIO,B --output_columns target --objective mse
+
+**On the Boston dataset, we are able to get a MSE error of 0.6**.
